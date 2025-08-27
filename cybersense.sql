@@ -539,7 +539,7 @@ INSERT INTO `students` (`studentId`, `full_name`, `date_of_birth`, `email`, `pas
 
 CREATE TABLE `user_activity_logs` (
   `activityLogId` varchar(50) NOT NULL,
-  `user_type` enum('students','instructors','admin') NOT NULL,
+  `user_type` enum('students','instructors','admins') NOT NULL,
   `user_id` varchar(50) NOT NULL,
   `activity_type` varchar(50) NOT NULL,
   `activity_details` text DEFAULT NULL,
