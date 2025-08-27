@@ -119,7 +119,6 @@ function saveUserData() {
     $id = isset($_POST[$idField]) ? $_POST[$idField] : '';
     if (empty($id)) {
         return json_encode(['success' => false, 'message' => 'User ID is required']);
-        return ;
     }
     try {
         if ($user_type === 'students') {
@@ -148,21 +147,17 @@ function deleteUser() {
     $admin_id = isset($_POST['admin_id']) ? trim($_POST['admin_id']) : '';
     if (empty($user_id)) {
         return json_encode(['success' => false,'message' => 'User ID is required']);
-        return ;
     }
 
     if (empty($user_type) || !in_array($user_type, ['students', 'instructors', 'admins'])) {
         return json_encode(['success' => false,'message' => 'Invalid user type']);
-        return ;
     }
     if (empty($admin_id)) {
         return json_encode(['success' => false,'message' => 'Admin ID is required for deletion tracking']);
-        return ;
     }
     
     if (empty($reason)) {
         return json_encode(['success' => false,'message' => 'Deletion reason is required']);
-        return ;
     }
     try {
         $idField = getIdFieldName($user_type);
@@ -176,7 +171,6 @@ function deleteUser() {
         $check_result = $check_stmt->get_result();  
         if ($check_result->num_rows === 0) {
             return json_encode(['success' => false,'message' => 'User not found']);
-            return ;
         }
         $conn->begin_transaction();
         $user_info_sql = "SELECT full_name, email FROM $user_type WHERE $idField = ?";

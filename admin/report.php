@@ -28,9 +28,9 @@ requireLogin();
                         <label for="activityUserTypeFilter">User Type</label>
                         <select id="activityUserTypeFilter">
                             <option value="">All User Types</option>
-                            <option value="student">Student</option>
-                            <option value="instructor">Instructor</option>
-                            <option value="admin">Admin</option>
+                            <option value="students">Students</option>
+                            <option value="instructors">Instructors</option>
+                            <option value="admins">Admins</option>
                         </select>
                     </div>
                     <div class="filter-group">
