@@ -49,10 +49,10 @@
                     ?>
                 </div>
             <?php endif; ?>
-            
             <h1 class="welcome-text">Hi, <?php echo $user; ?>!</h1>
             <h2 class="subtitle">Module overview</h2>
-            <hr class="separator">
+            <hr class="separator" style="margin: 20px 0;">
+
             <div class="filter-controls">
                 <input type="text" class="search-input" placeholder="Search Module">
                 <button class="sort-btn">Sort by module name</button>
