@@ -26,11 +26,11 @@ if ($_POST) {
                     $quizId = $result['quiz_id'];
                     $action = 'edit';
                     $quiz_data = getQuizById($quizId);
-                    header("Location: details.php?id={$moduleId}&success_message={$success_message}");
+                    header("Location: details.php?id={$moduleId}&success_message={$success_message}&tab=quizzes");
                     exit;
                 } else {
                     $error_message = $result['message'];
-                    header("Location: details.php?id={$moduleId}&error_message={$error_message}");
+                    header("Location: details.php?id={$moduleId}&error_message={$error_message}&tab=quizzes");
                     exit;
                 }
                 break;
@@ -39,10 +39,10 @@ if ($_POST) {
                 if ($result['status']) {
                     $success_message = $result['message'];
                     $quiz_data = getQuizById($quizId);
-                    header("Location: details.php?id={$moduleId}&success_message={$success_message}");
+                    header("Location: details.php?id={$moduleId}&success_message={$success_message}&tab=quizzes");
                 } else {
                     $error_message = $result['message'];
-                    header("Location: details.php?id={$moduleId}&error_message={$error_message}");
+                    header("Location: details.php?id={$moduleId}&error_message={$error_message}&tab=quizzes");
                     exit;
                 }
                 break;
@@ -475,7 +475,7 @@ switch ($action) {
                         <label for="passing_score"><strong>Passing Score:</strong></label>
                         <input type="number" id="passing_score" name="passing_score" 
                                value="<?php echo htmlspecialchars($quiz_data['passing_score'] ?? ''); ?>" 
-                               class="form-input" required min="0" max="100"
+                               class="form-input" required min="1" max="100"
                                placeholder="e.g., 70">
                         <small class="file-help">Students need to score at least this percentage to pass</small>
                     </div>

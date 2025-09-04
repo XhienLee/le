@@ -9,6 +9,7 @@
         header('Location: index.php');
         exit();
     }
+    $tab = isset($_GET['tab']) ? $_GET['tab'] : 'course';
     $studentId = $_SESSION['user_id'];
     $courseDetails = getCourseById($moduleId); 
     $enrolledStudent = getStudentByModuleID($moduleId);
@@ -129,11 +130,11 @@
             <div id="toast" class="toast hidden"></div>
             <div class="tabs">
                 <div class="tabs-left">
-                    <button class="tab-btn active" data-tab="course">Course</button>
-                    <button class="tab-btn" data-tab="quizzes">Quizzes</button>
-                    <button class="tab-btn" data-tab="participants">Participants</button>
-                    <button class="tab-btn" data-tab="grade">Grade</button>
-                    <button class="tab-btn" data-tab="enroll">Enroll Student</button>
+                    <button class="tab-btn <?php echo ($tab === 'course') ? 'active' : ''; ?>" data-tab="course">Course</button>
+                    <button class="tab-btn <?php echo ($tab === 'quizzes') ? 'active' : ''; ?>" data-tab="quizzes">Quizzes</button>
+                    <button class="tab-btn <?php echo ($tab === 'participants') ? 'active' : ''; ?>" data-tab="participants">Participants</button>
+                    <button class="tab-btn <?php echo ($tab === 'grade') ? 'active' : ''; ?>" data-tab="grade">Grade</button>
+                    <button class="tab-btn <?php echo ($tab === 'enroll') ? 'active' : ''; ?>" data-tab="enroll">Enroll Student</button>
                 </div>
                 <div class="tabs-right">
                     <button class="add-quiz-btn" id="addQuizBtn" onclick="createNewQuiz('<?php echo htmlspecialchars($moduleId); ?>')"> 
@@ -147,7 +148,7 @@
                     </button>
                 </div>
             </div>
-            <div class="tab-content active" id="course">
+            <div class="tab-content <?php echo ($tab === 'course') ? 'active' : ''; ?>" id="course">
                 <h2>Module Details</h2>
                 <form method="POST" class="module-form" id="moduleForm">
                     <input type="hidden" name="action" value="update_module">
@@ -209,7 +210,7 @@
                     </div>
                 </form>
             </div>
-             <div class="tab-content" id="quizzes">
+            <div class="tab-content <?php echo ($tab === 'quizzes') ? 'active' : ''; ?>" id="quizzes">
                 <h2>Quizzes</h2>
                 <?php
                 if (!empty($quizzes)){
@@ -219,7 +220,7 @@
                 }
                 ?>  
             </div>
-            <div class="tab-content" id="participants">
+            <div class="tab-content <?php echo ($tab === 'participants') ? 'active' : ''; ?>" id="participants">
                 <h2>Participants</h2>
                 <?php
                 if (!empty($students)){
@@ -230,12 +231,12 @@
                 ?>  
             </div>
             
-            <div class="tab-content" id="grade">
+            <div class="tab-content <?php echo ($tab === 'grade') ? 'active' : ''; ?>" id="grade">
                 <h2>Grade</h2>
                 <?php echo generateGradesTable($studentGrades); ?>
             </div>
             
-            <div class="tab-content" id="enroll">
+            <div class="tab-content <?php echo ($tab === 'enroll') ? 'active' : ''; ?>" id="enroll">
                 <h2>Enroll Student</h2>
                 <div class="enroll-section">
                     <div class="search-section">
@@ -316,21 +317,19 @@
                 hideAlerts();
             }, 8000);
         <?php endif; ?>
-    </script>
-    <script>
-window.onload = function () {
-  const urlParams = new URLSearchParams(window.location.search);
-  const message = urlParams.get('message');
+    window.onload = function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
 
-  if (message) {
-    const toast = document.getElementById('toast');
-    toast.textContent = decodeURIComponent(message);
-    toast.classList.remove('hidden');
-    setTimeout(() => {
-      toast.classList.add('hidden');
-    }, 3000);
-  }
-};
+    if (message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = decodeURIComponent(message);
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+        toast.classList.add('hidden');
+        }, 3000);
+    }
+    };
 </script>
 
 </body>

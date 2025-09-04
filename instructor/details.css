@@ -614,8 +614,6 @@ table.grades-table tr:hover {
 .grade-d { background-color: #FF9800; }
 .grade-f { background-color: #F44336; }
 
-
-
 .modal {
     display: none;
     position: fixed;

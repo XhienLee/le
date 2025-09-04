@@ -3,11 +3,15 @@
 • password policy
 • profile page
 • home button redirect (instructor) ✅
-• creation module error (retain details) ✅
-• instructor can create quiz with zero (0) passing score
+• creation module error (retain details) ✅ show error in the modal, refresh will reset the data but closing the modal will not affect it ✅
+• instructor can create quiz with zero (0) passing score ✅
 • redirect quiz page edit back to edit page
 • instructor enroll button search (broken) ✅
 • grade form (clean up/revamp)
 • instructor button for analytics (optional)
 • review answers (students)
 • instructor page log out error (course page) ✅
+
+• Additional Improvement ✅
+• Centered the delete module confirmation
+• Instructor details.php when refreshing the page it stay where you last visited

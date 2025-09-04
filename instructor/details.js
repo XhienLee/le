@@ -1,26 +1,74 @@
 let isEditing = false;
 let originalValues = {};
 let foundStudent = null;
+
 document.addEventListener("DOMContentLoaded", function () {
     initializeTabs();
     initializeEditFunctionality();
     initializeAlerts();
+    handleUrlMessages();
 });
 
+function handleUrlMessages() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+    let shouldUpdateUrl = false;
+    if (message) {
+        const toast = document.getElementById('toast');
+        if (toast) {
+            toast.textContent = decodeURIComponent(message);
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+        shouldUpdateUrl = true;
+    }
+    if (urlParams.has('message') || urlParams.has('success_message') || urlParams.has('error_message')) {
+        urlParams.delete('message');
+        urlParams.delete('success_message');
+        urlParams.delete('error_message');
+        shouldUpdateUrl = true;
+    }
+    if (shouldUpdateUrl) {
+        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.history.replaceState(null, '', newUrl);
+    }
+}
+
 function initializeTabs() {
-    document.querySelectorAll('.tab-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            if (button.dataset.tab) {
-                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                button.classList.add('active');
-                const tabContent = document.getElementById(button.dataset.tab);
-                if (tabContent) {
-                    tabContent.classList.add('active');
-                }
+    const buttons = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+    
+    function openTab(tabName) {
+        buttons.forEach(btn => btn.classList.remove('active'));
+        contents.forEach(content => content.classList.remove('active'));
+        
+        const activeButton = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+        const activeContent = document.getElementById(tabName);
+        
+        if (activeButton) activeButton.classList.add('active');
+        if (activeContent) activeContent.classList.add('active');
+    }
+    
+    buttons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            const tabName = button.dataset.tab;
+            
+            if (tabName) {
+                openTab(tabName);
+                const url = new URL(window.location);
+                url.searchParams.set('tab', tabName);
+                window.history.replaceState(null, '', url);
             }
         });
     });
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialTab = urlParams.get('tab') || 'course';
+    const validTab = document.getElementById(initialTab) ? initialTab : 'course';
+    openTab(validTab);
 }
 
 function initializeEditFunctionality() {
@@ -28,21 +76,53 @@ function initializeEditFunctionality() {
     if (moduleForm) {
         moduleForm.addEventListener('submit', handleFormSubmission);
     }
+    
+    const pdfFileInput = document.getElementById('pdf_file');
+    if (pdfFileInput) {
+        pdfFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.type !== 'application/pdf') {
+                    showAlert('error', 'Please select a valid PDF file.');
+                    e.target.value = '';
+                    return;
+                }
+                const maxSize = 10 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    showAlert('error', 'PDF file size must be less than 10MB.');
+                    e.target.value = '';
+                    return;
+                }
+                
+                showAlert('success', `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+            }
+        });
+    }
 }
+
 function createNewQuiz(moduleId){
     window.location.href = 'quiz.php?action=create&module=' + moduleId;
 }
+
 function toggleEdit() {
     const editBtn = document.getElementById('editModuleBtn');
     const formInputs = document.querySelectorAll('.form-input, .form-textarea');
     const formActions = document.getElementById('formActions');
+    const pdfDisplaySection = document.getElementById('pdf_display_section');
+    const pdfUploadSection = document.getElementById('pdf_upload_section');
+    
     if (!isEditing) {
         isEditing = true;
         originalValues = {};
         formInputs.forEach(input => {
-            originalValues[input.name] = input.value;
-            input.removeAttribute('readonly');
+            if (input.type !== 'file') {
+                originalValues[input.name] = input.value;
+                input.removeAttribute('readonly');
+            }
         });
+        
+        if (pdfDisplaySection) pdfDisplaySection.style.display = 'none';
+        if (pdfUploadSection) pdfUploadSection.style.display = 'block';
 
         editBtn.innerHTML = '<i class="fas fa-times"></i> Cancel Edit';
         editBtn.classList.add('cancel');
@@ -59,12 +139,21 @@ function cancelEdit() {
     const editBtn = document.getElementById('editModuleBtn');
     const formInputs = document.querySelectorAll('.form-input, .form-textarea');
     const formActions = document.getElementById('formActions');
+    const pdfDisplaySection = document.getElementById('pdf_display_section');
+    const pdfUploadSection = document.getElementById('pdf_upload_section');
+    const pdfFileInput = document.getElementById('pdf_file');
+    
     formInputs.forEach(input => {
-        if (originalValues[input.name] !== undefined) {
+        if (input.type !== 'file' && originalValues[input.name] !== undefined) {
             input.value = originalValues[input.name];
+            input.setAttribute('readonly', true);
         }
-        input.setAttribute('readonly', true);
     });
+    
+    if (pdfDisplaySection) pdfDisplaySection.style.display = 'block';
+    if (pdfUploadSection) pdfUploadSection.style.display = 'none';
+    if (pdfFileInput) pdfFileInput.value = '';
+    
     editBtn.innerHTML = '<i class="fas fa-edit"></i> Edit Module Info';
     editBtn.classList.remove('cancel');
     if (formActions) {
@@ -81,12 +170,29 @@ function handleFormSubmission(e) {
         showAlert('error', 'Please click "Edit Module Info" to enable editing first.');
         return;
     }
+    
     const formData = new FormData(e.target);
     const title = formData.get('title');
     if (!title || title.trim() === '') {
         showAlert('error', 'Title is required.');
         return;
     }
+    
+    const pdfFile = document.getElementById('pdf_file').files[0];
+    if (pdfFile) {
+        if (pdfFile.type !== 'application/pdf') {
+            showAlert('error', 'Please select a valid PDF file.');
+            return;
+        }
+        const maxSize = 10 * 1024 * 1024;
+        if (pdfFile.size > maxSize) {
+            showAlert('error', 'PDF file size must be less than 10MB.');
+            return;
+        }
+    }
+    
+    showAlert('success', 'Updating module information...');
+    
     fetch(window.location.href, {
         method: 'POST',
         body: formData
@@ -110,6 +216,7 @@ function handleFormSubmission(e) {
             showAlert('success', 'Module information updated successfully!');
             setTimeout(() => {
                 cancelEdit();
+                window.location.reload();
             }, 1500);
         }
     })
@@ -118,6 +225,7 @@ function handleFormSubmission(e) {
         showAlert('error', 'An error occurred while updating the module. Please try again.');
     });
 }
+
 function confirmDeleteModule() {
     if (isEditing) {
         showAlert('error', 'Please save or cancel your changes before deleting the module.');
@@ -130,9 +238,10 @@ function confirmDeleteModule() {
         titleElement.textContent = currentTitle;
     }
     if (modal) {
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
     }
 }
+
 function deleteModule() {
     const confirmModal = document.getElementById('deleteConfirmModal');
     const processingModal = document.getElementById('processingModal');
@@ -194,6 +303,7 @@ function closeDeleteModal() {
         modal.style.display = 'none';
     }
 }
+
 function initializeAlerts() {
     const successAlert = document.getElementById('successAlert');
     const errorAlert = document.getElementById('errorAlert');
@@ -513,142 +623,6 @@ function escapeHtml(text) {
     const map = {'&': '&amp;','<': '&lt;','>': '&gt;','"': '&quot;',"'": '&#039;'};
     return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
-function toggleEdit() {
-    const editBtn = document.getElementById('editModuleBtn');
-    const formInputs = document.querySelectorAll('.form-input, .form-textarea');
-    const formActions = document.getElementById('formActions');
-    const pdfDisplaySection = document.getElementById('pdf_display_section');
-    const pdfUploadSection = document.getElementById('pdf_upload_section');
-    if (!isEditing) {
-        isEditing = true;
-        originalValues = {};
-        formInputs.forEach(input => {
-            if (input.type !== 'file') {
-                originalValues[input.name] = input.value;
-                input.removeAttribute('readonly');
-            }
-        });
-        if (pdfDisplaySection) pdfDisplaySection.style.display = 'none';
-        if (pdfUploadSection) pdfUploadSection.style.display = 'block';
-
-        editBtn.innerHTML = '<i class="fas fa-times"></i> Cancel Edit';
-        editBtn.classList.add('cancel');
-        if (formActions) {
-            formActions.classList.add('show');
-        }
-        showAlert('success', 'Edit mode enabled. Make your changes and click "Save Changes" to update.'); 
-    } else {
-        cancelEdit();
-    }
-}
-
-function cancelEdit() {
-    const editBtn = document.getElementById('editModuleBtn');
-    const formInputs = document.querySelectorAll('.form-input, .form-textarea');
-    const formActions = document.getElementById('formActions');
-    const pdfDisplaySection = document.getElementById('pdf_display_section');
-    const pdfUploadSection = document.getElementById('pdf_upload_section');
-    const pdfFileInput = document.getElementById('pdf_file');
-    
-    formInputs.forEach(input => {
-        if (input.type !== 'file' && originalValues[input.name] !== undefined) {
-            input.value = originalValues[input.name];
-            input.setAttribute('readonly', true);
-        }
-    });
-    if (pdfDisplaySection) pdfDisplaySection.style.display = 'block';
-    if (pdfUploadSection) pdfUploadSection.style.display = 'none';
-    if (pdfFileInput) pdfFileInput.value = '';
-    
-    editBtn.innerHTML = '<i class="fas fa-edit"></i> Edit Module Info';
-    editBtn.classList.remove('cancel');
-    if (formActions) {
-        formActions.classList.remove('show');
-    }
-    isEditing = false;
-    originalValues = {};
-    hideAlerts();
-}
-function handleFormSubmission(e) {
-    e.preventDefault();
-    if (!isEditing) {
-        showAlert('error', 'Please click "Edit Module Info" to enable editing first.');
-        return;
-    }
-    const formData = new FormData(e.target);
-    const title = formData.get('title');
-    if (!title || title.trim() === '') {
-        showAlert('error', 'Title is required.');
-        return;
-    }
-    const pdfFile = document.getElementById('pdf_file').files[0];
-    if (pdfFile) {
-        if (pdfFile.type !== 'application/pdf') {
-            showAlert('error', 'Please select a valid PDF file.');
-            return;
-        }
-        const maxSize = 10 * 1024 * 1024;
-        if (pdfFile.size > maxSize) {
-            showAlert('error', 'PDF file size must be less than 10MB.');
-            return;
-        }
-    }
-    showAlert('success', 'Updating module information...');
-    fetch(window.location.href, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.text();
-    })
-    .then(html => {
-        if (html.includes('alert-success') && html.includes('display: block')) {
-            showAlert('success', 'Module information updated successfully!');
-            setTimeout(() => {
-                cancelEdit();
-                window.location.reload();
-            }, 1500);
-        } else if (html.includes('alert-error') && html.includes('display: block')) {
-            showAlert('error', 'Failed to update module information. Please try again.');
-        } else {
-            showAlert('success', 'Module information updated successfully!');
-            setTimeout(() => {
-                cancelEdit();
-                window.location.reload();
-            }, 1500);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showAlert('error', 'An error occurred while updating the module. Please try again.');
-    });
-}
-document.addEventListener('DOMContentLoaded', function() {
-    const pdfFileInput = document.getElementById('pdf_file');
-    if (pdfFileInput) {
-        pdfFileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                if (file.type !== 'application/pdf') {
-                    showAlert('error', 'Please select a valid PDF file.');
-                    e.target.value = '';
-                    return;
-                }
-                const maxSize = 10 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    showAlert('error', 'PDF file size must be less than 10MB.');
-                    e.target.value = '';
-                    return;
-                }
-                
-                showAlert('success', `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
-            }
-        });
-    }
-});
 
 function showLogoutModal() {
     const modal = document.getElementById("logoutModal");
