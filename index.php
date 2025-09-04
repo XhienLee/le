@@ -70,7 +70,7 @@ if (!in_array($user_type, ['student', 'instructor', 'admin'])) {
                     <p>We implement robust security measures to protect your information:</p>
                     <ul>
                         <li>All passwords are encrypted using password hashing algorithms</li>
-                        <li>Data is stored on secure servers within the a secured server</li>
+                        <li>Data is stored on secure servers within a secured server</li>
                         <li>Access to personal data is restricted to authorized personnel only</li>
                         <li>Session data is automatically cleared when you log out or after inactivity</li>
                     </ul>

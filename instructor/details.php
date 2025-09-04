@@ -97,15 +97,23 @@
 <body>
     <div class="container">
         <header class="top-nav">
-            <img src="../assets/images/icons/profile.png" alt="User Profile" style="width: 40px; height: 40px; border-radius: 50%;"/>
-            <nav class="main-menu">
-                <a href="../index.php">Home</a>
-                <a href="index.php">My Modules</a>
-            </nav>
-            <span class="logout-container">
-                <a href="#" class="logout-link" onclick="showLogoutModal()">Logout</a>
-            </span>
-        </header>
+    <img src="../assets/images/icons/profile.png" alt="User Profile" class="profile-image" style="width: 40px; height: 40px;"/>
+      <nav class="main-menu">
+        <a href="../index.php" class="<?php echo isActive("index.php") ?>">Home</a>
+        <a href="index.php" class="<?php echo isActive("index.php") ?>">My courses</a>
+      </nav>
+      <span class="logout-container"><a href="#" class="logout-link" onclick="showLogoutModal()">Logout</a></span>
+    </header>
+    <div id="logoutModal" class="modal">
+        <div class="modal-content">
+            <h2>Are you sure you want to log out?</h2>
+            <p>We hope to see you again soon!</p>
+            <div class="modal-actions">
+                <button class="cancel-btn" onclick="closeLogoutModal()">Cancel</button>
+                <button class="confirm-btn" onclick="confirmLogout()">Logout</button>
+            </div>
+        </div>
+    </div>
 
         <main class="content">
             <div class="course-header">

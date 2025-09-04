@@ -7,6 +7,19 @@
     $user = isset($_SESSION['full_name']) ? strtok($_SESSION['full_name'], " ") : "Instructor";
     $courses = getManageModule($_SESSION['user_id']);
 ?>
+<?php if (isset($_SESSION['clear_form_data']) && $_SESSION['clear_form_data'] === true): ?>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            sessionStorage.removeItem('createModuleFormData');
+        } catch(e) {
+        }
+    });
+</script>
+<?php 
+    unset($_SESSION['clear_form_data']);
+endif; 
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,7 +80,7 @@
     <div class="side-overlay" id="sideOverlay">
         <button class="close-btn" onclick="closeOverlay()">×</button>
         <div class="overlay-content">
-           <a href="../index.php" class="<?php echo isActive("home.php") ?>">Home</a>
+           <a href="../index.php" class="<?php echo isActive("index.php") ?>">Home</a>
             <a href="index.php" class="<?php echo isActive("index.php") ?>">My courses</a>
         </div>
     </div>

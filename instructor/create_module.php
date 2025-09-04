@@ -17,34 +17,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $content_text = trim($_POST['content_text']) ?: null;
         $content_video_url = trim($_POST['content_video_url']) ?: null;
         $instructorId = $_SESSION['user_id'];
+        
         if (empty($title)) {
             throw new Exception('Module title is required.');
         }
+        
         $moduleId = generateModuleId();
         $content_pdf_path = null;
         $module_image_path = null;
+        
         if (isset($_FILES['content_pdf']) && $_FILES['content_pdf']['error'] === UPLOAD_ERR_OK) {
             $content_pdf_path = uploadPdf($_FILES['content_pdf'], $moduleId);
         }
+        
         if (isset($_FILES['module_image']) && $_FILES['module_image']['error'] === UPLOAD_ERR_OK) {
             $module_image_path = uploadModuleImage($_FILES['module_image'], $moduleId);
         }
+        
         $sql = "INSERT INTO module (moduleId, title, description, content_text, content_video_url, content_pdf_path, module_image_path, instructorId) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
+        
         if (!$stmt) {
             throw new Exception('Failed to prepare module statement: ' . $conn->error);
         }
+        
         $stmt->bind_param("ssssssss", $moduleId, $title, $description, $content_text, $content_video_url, $content_pdf_path, $module_image_path, $instructorId);
+        
         if (!$stmt->execute()) {
             throw new Exception('Failed to create module: ' . $stmt->error);
         }
         createLog($conn, $instructorId, $title, $moduleId);
         $conn->commit();
         $stmt->close();
+        $_SESSION['clear_form_data'] = true;
         $_SESSION['success_message'] = "Module '{$title}' created successfully with ID: {$moduleId}";
+        
         header('Location: index.php');
         exit();
+        
     } catch (Exception $e) {
         $conn->rollback();
         if (isset($content_pdf_path) && file_exists($content_pdf_path)) {

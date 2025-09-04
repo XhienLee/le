@@ -649,3 +649,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function showLogoutModal() {
+    const modal = document.getElementById("logoutModal");
+    modal.style.display = "flex";
+    modal.style.animation = "fadeIn 0.3s ease-in-out";
+}
+
+function closeLogoutModal() {
+    const modal = document.getElementById("logoutModal");
+    modal.style.display = "none";
+}
+
+function confirmLogout() {
+    window.location.href = "../logout.php";
+}

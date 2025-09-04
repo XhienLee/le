@@ -1,0 +1,13 @@
+* Privacy policy text error ✅
+• Navigation 
+• password policy
+• profile page
+• home button redirect (instructor) ✅
+• creation module error (retain details) ✅ also data is retain untill it is submitted (refresh won't affect the filled data)
+• instructor can create quiz with zero (0) passing score
+• redirect quiz page edit back to edit page
+• instructor enroll button search (broken) ✅
+• grade form (clean up/revamp)
+• instructor button for analytics (optional)
+• review answers (students)
+• instructor page log out error (course page) ✅
