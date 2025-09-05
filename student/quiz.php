@@ -1,11 +1,12 @@
 <?php
 session_start();
-require_once 'functions.php';
+require_once '../functions/functions.php';
 require_once '../functions/module.php';
 require_once '../functions/session.php';
 requireLogin();
 $quizId = $_GET['id'] ?? null;
 $resultId = $_GET['result'] ?? null;
+$showDetails = true;
 $studentId = $_SESSION['user_id'];
 if (!$quizId) {
     header('Location: dashboard.php');
@@ -78,6 +79,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_quiz'])) {
 if ($resultId) {
     $quizResult = getQuizResult($quizId, $studentId);
     $showResults = true;
+    if ($showDetails && !empty($quizResult)) {
+        $quizAttempt = getQuizAttempt($quizResult['recordId']);
+        if (!empty($quizAttempt) && isset($quizAttempt[0]['student_answer'])) {
+            $attemptData = $quizAttempt[0];
+            $studentAnswers = json_decode($attemptData['student_answer'], true);
+            if (is_array($studentAnswers)) {
+                foreach ($studentAnswers as $answerJsonString) {
+                    if (is_string($answerJsonString)) {
+                        $answer = json_decode($answerJsonString, true);
+                    } else {
+                        $answer = $answerJsonString;
+                    }
+                    if ($answer && isset($answer['questionId'])) {
+                        $detailedAnswers[$answer['questionId']] = $answer;
+                    }
+                }
+            }
+        }
+        $quizQuestions = getQuizQuestions($quizId);
+    }
 } else {
     $allQuestion = getQuizQuestions($quizId);
     if (!isset($_SESSION['questions']) || empty($_SESSION['questions'])) {
@@ -96,6 +117,68 @@ if ($resultId) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($quizInfo['title']); ?> - <?php echo $showResults ? 'Results' : 'Quiz'; ?></title>
     <link rel="stylesheet" href="quiz.css">
+    <style>
+        .answer-details {
+            margin-top: 20px;
+        }
+        .question-detail {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .question-detail.correct {
+            border-left: 4px solid #28a745;
+        }
+        .question-detail.incorrect {
+            border-left: 4px solid #dc3545;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .answer-choice {
+            margin: 5px 0;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .answer-choice.student-answer {
+            background-color: #e3f2fd;
+            border: 1px solid #2196f3;
+        }
+        .answer-choice.correct-answer {
+            background-color: #e8f5e8;
+            border: 1px solid #4caf50;
+        }
+        .answer-choice.student-answer.incorrect {
+            background-color: #ffebee;
+            border: 1px solid #f44336;
+        }
+        .answer-status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .answer-status.correct {
+            color: #28a745;
+        }
+        .answer-status.incorrect {
+            color: #dc3545;
+        }
+        .toggle-details {
+            margin: 10px 0;
+        }
+        .toggle-details a {
+            background: #007bff;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .toggle-details a:hover {
+            background: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -130,6 +213,76 @@ if ($resultId) {
                                 <p>The passing score is <?php echo htmlspecialchars($quizInfo['passing_score']); ?>%. You may retake the quiz to improve your score.</p>
                             </div>
                         <?php endif; ?>
+                        <?php if ($showDetails && !empty($detailedAnswers) && !empty($quizQuestions)): ?>
+                            <div class="answer-details">
+                                <h3>Answer Details:</h3>
+                                <?php foreach ($quizQuestions as $index => $question): ?>
+                                    <?php 
+                                        $questionId = $question['questionId'];
+                                        $answer = $detailedAnswers[$questionId] ?? null;
+                                        if (!$answer) continue;
+                                        
+                                        $isCorrect = $answer['isCorrect'];
+                                        $studentAnswerKey = '';
+                                        $correctAnswerKey = $question['correct_answer'];
+                                        
+                                        // Get options
+                                        $options = [];
+                                        if (isset($question['answer_option']) && !empty($question['answer_option'])) {
+                                            $options = json_decode($question['answer_option'], true);
+                                            if (!is_array($options)) {
+                                                $options = [];
+                                            }
+                                        }
+                                        if (empty($options) && $question['question_type'] === 'true_false') {
+                                            $options = ['a' => 'True', 'b' => 'False'];
+                                        }
+                                        
+                                        // Find student answer key
+                                        foreach ($options as $key => $text) {
+                                            if ($text === $answer['studentAnswer']) {
+                                                $studentAnswerKey = $key;
+                                                break;
+                                            }
+                                        }
+                                    ?>
+                                    <div class="question-detail <?php echo $isCorrect ? 'correct' : 'incorrect'; ?>">
+                                        <div class="question-text">
+                                            Question <?php echo $index + 1; ?>: <?php echo htmlspecialchars($question['question_text']); ?>
+                                        </div>
+                                        
+                                        <?php foreach ($options as $key => $optionText): ?>
+                                            <?php 
+                                                $classes = ['answer-choice'];
+                                                if ($key === $studentAnswerKey) {
+                                                    $classes[] = 'student-answer';
+                                                    if (!$isCorrect) {
+                                                        $classes[] = 'incorrect';
+                                                    }
+                                                }
+                                                if ($key === $correctAnswerKey) {
+                                                    $classes[] = 'correct-answer';
+                                                }
+                                            ?>
+                                            <div class="<?php echo implode(' ', $classes); ?>">
+                                                <?php echo strtoupper($key); ?>. <?php echo htmlspecialchars($optionText); ?>
+                                                <?php if ($key === $studentAnswerKey): ?>
+                                                    <strong> (Your Answer)</strong>
+                                                <?php endif; ?>
+                                                <?php if ($key === $correctAnswerKey): ?>
+                                                    <strong> (Correct Answer)</strong>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endforeach; ?>
+                                        
+                                        <div class="answer-status <?php echo $isCorrect ? 'correct' : 'incorrect'; ?>">
+                                            <?php echo $isCorrect ? '✓ Correct' : '✗ Incorrect'; ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                        
                     <?php else: ?>
                         <p>No quiz results found. Please complete the quiz first.</p>
                     <?php endif; ?>

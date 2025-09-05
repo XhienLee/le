@@ -1,17 +1,21 @@
 * Privacy policy text error ✅
 • Navigation 
 • password policy
-• profile page
+• profile page (will be implemented when converting to laravel)
 • home button redirect (instructor) ✅
 • creation module error (retain details) ✅ show error in the modal, refresh will reset the data but closing the modal will not affect it ✅
 • instructor can create quiz with zero (0) passing score ✅
-• redirect quiz page edit back to edit page
+• redirect quiz page edit back to edit page ✅
 • instructor enroll button search (broken) ✅
 • grade form (clean up/revamp)
 • instructor button for analytics (optional)
-• review answers (students)
+• review answers (students) ✅ can be set to false (only show details of the quzi) or true (show details and the answer)
 • instructor page log out error (course page) ✅
 
 • Additional Improvement ✅
 • Centered the delete module confirmation
 • Instructor details.php when refreshing the page it stay where you last visited
+• review answers (instructor) 
+
+• To be added later when converting this to laravel
+• Instructor can set if the student can see the correct answer or not after the quiz

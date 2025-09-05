@@ -1181,3 +1181,17 @@ table.grades-table tr:hover {
 .cancel-btn:active, .confirm-btn:active {
     transform: scale(0.98);
 }
+.results-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    background-color: #099c0e;
+}
+
+.results-btn:hover {
+    background-color: #076d0b;
+}

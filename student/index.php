@@ -3,7 +3,7 @@
     require_once '../functions/session.php';
     require_once '../functions/student_function.php';
     require_once '../functions/module.php';
-    require_once 'functions.php';
+    require_once '../functions/functions.php';
     requireLogin();
     $user = isset($_SESSION['full_name']) ? strtok($_SESSION['full_name'], " ") : "Student";
     $moduleInfos = getModule();;

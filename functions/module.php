@@ -218,7 +218,6 @@ function updateModule($moduleId, $title, $description, $contentText, $videoUrl, 
     try {
         $stmt = $conn->prepare("UPDATE `module` SET title = ?, description = ?, content_text = ?, content_video_url = ?, content_pdf_path = ? WHERE moduleId = ?");
         $stmt->bind_param("ssssss", $title, $description, $contentText, $videoUrl, $pdfPath, $moduleId);
-        
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {
                 return ['status' => true, 'message' => 'Module updated successfully'];
@@ -227,6 +226,21 @@ function updateModule($moduleId, $title, $description, $contentText, $videoUrl, 
             }
         } else {
             return ['status' => false, 'message' => 'Database error: ' . $conn->error];
+        }
+    } catch (Exception $e) {
+        return ['status' => false, 'message' => 'Error updating module: ' . $e->getMessage()];
+    }
+}
+function getQuizAttempt($recordId) {
+    require 'db_connect.php';
+    try {
+        $stmt = $conn->prepare("SELECT * FROM quiz_attempt WHERE recordId = ?");
+        $stmt->bind_param("s", $recordId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $res = $result->fetch_all(MYSQLI_ASSOC);
+            return $res;
         }
     } catch (Exception $e) {
         return ['status' => false, 'message' => 'Error updating module: ' . $e->getMessage()];

@@ -33,10 +33,10 @@ endif;
     <div class="container">
         <header class="top-nav">
             <div class="profile-container">
-                <img src="../assets/images/icons/profile.png" alt="User Profile" class="profile-image" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"/>
+                <img src="../assets/images/profile/profile.png" alt="User Profile" class="profile-image" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"/>
             </div>
             <nav class="main-menu">
-                <a href="index.php" class="<?php echo isActive("dashboard.php") ?>">Home</a>
+                <a href="../index.php" class="<?php echo isActive("dashboard.php") ?>">Home</a>
                 <a href="index.php" class="<?php echo isActive("index.php") ?>">My courses</a>
             </nav>
             <span class="logout-container">

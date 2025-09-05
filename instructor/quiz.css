@@ -87,3 +87,11 @@
         padding: 20px;
     }
 }
+
+.results-btn {
+    background-color: #099c0e;
+}
+
+.results-btn:hover {
+    background-color: #076d0b;
+}

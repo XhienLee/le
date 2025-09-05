@@ -233,7 +233,7 @@
             
             <div class="tab-content <?php echo ($tab === 'grade') ? 'active' : ''; ?>" id="grade">
                 <h2>Grade</h2>
-                <?php echo generateGradesTable($studentGrades); ?>
+                <?php echo generateGradesTable($studentGrades, $moduleId); ?>
             </div>
             
             <div class="tab-content <?php echo ($tab === 'enroll') ? 'active' : ''; ?>" id="enroll">
@@ -307,9 +307,7 @@
     <script src="details.js"></script>
     <script>
         <?php if ($success_message): ?>
-            setTimeout(() => {
-                hideAlerts();
-            }, 5000);
+            setTimeout(() => {hideAlerts(); }, 5000);
         <?php endif; ?>
         
         <?php if ($error_message): ?>

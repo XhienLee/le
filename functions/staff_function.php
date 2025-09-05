@@ -60,7 +60,7 @@ function generateStudentTable($students) {
 
 
 
-function generateGradesTable($studentGrade) {
+function generateGradesTable($studentGrade, $moduleId) {
     if (!$studentGrade) {
         return "<p>No grades yet recorded in this module.</p>";
     }
@@ -76,6 +76,7 @@ function generateGradesTable($studentGrade) {
                 <th>Duration (Minutes)</th>
                 <th>Grade</th>
                 <th>Feedback</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -87,6 +88,7 @@ function generateGradesTable($studentGrade) {
     foreach ($studentGrade as $grd) {
         $studentId = $grd['studentId'];
         $quizId = $grd['quizId'];
+        $recordId = $grd['recordId'];
         $quizInfo = getQuizInfo($quizId);
         $quizTitle = htmlspecialchars($quizInfo['title'] ?? 'Unknown');
         $questionsCount = htmlspecialchars($quizInfo['total_questions'] ?? 'Unknown');
@@ -104,6 +106,11 @@ function generateGradesTable($studentGrade) {
                 <td>$duration</td>
                 <td>$grade</td>
                 <td>$feedback</td>
+                <td>
+                <button class=\"results-btn\" onclick=\"window.open('result.php?quizId={$quizId}&moduleId={$moduleId}&recordId={$recordId}&studentId={$studentId}', '_blank');\">
+                    View Results
+                </button>
+            </td>
             </tr>
         ";
         $total_questions += $questionsCount;
